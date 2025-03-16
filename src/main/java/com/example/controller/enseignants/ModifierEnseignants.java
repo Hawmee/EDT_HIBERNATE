@@ -1,5 +1,8 @@
 package com.example.controller.enseignants;
 
+import com.example.DAO.ProfDAO;
+import com.example.model.Profs;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -14,8 +17,15 @@ public class ModifierEnseignants extends JPanel {
     private JButton valider , annuler;
     private CardLayout enseignantLayout;
     private GridBagConstraints gbc;
-    public ModifierEnseignants(JPanel enseignantPage){
 
+    private MainEnseignants mainEnseignants;
+    private int selectedProfId;
+
+    private ProfDAO profDAO;
+    public ModifierEnseignants(JPanel enseignantPage , MainEnseignants mainEnseignants, int profId){
+        profDAO = new ProfDAO();
+        this.mainEnseignants = mainEnseignants;
+        this.selectedProfId = profId;
         this.enseignantPage = enseignantPage;
         this.enseignantLayout = (CardLayout) enseignantPage.getLayout();
 
@@ -102,6 +112,12 @@ public class ModifierEnseignants extends JPanel {
         bodyContainer.add(buttonWrapper , gbc);
 
 
+        valider.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateProf();
+            }
+        });
 
         annuler.addActionListener(new ActionListener() {
             @Override
@@ -110,7 +126,44 @@ public class ModifierEnseignants extends JPanel {
             }
         });
 
+        populateForm(selectedProfId);
         add(header , BorderLayout.NORTH);
         add(content, BorderLayout.CENTER);
+    }
+
+
+    public void populateForm(int profId){
+        Profs prof = profDAO.findProfById(profId);
+
+        if(prof!=null){
+            nom.setText(prof.getNom());
+            prenom.setText(prof.getPrenoms());
+            grade.setText(prof.getGrade());
+        }
+    }
+
+    private void updateProf(){
+        String nomValue = nom.getText();
+        String prenomValue = prenom.getText();
+        String gradeValue = grade.getText();
+
+        Profs prof = profDAO.findProfById(selectedProfId);
+
+        if(prof != null){
+
+            if(nomValue.isEmpty() || prenomValue.isEmpty() || gradeValue.isEmpty()){
+                JOptionPane.showMessageDialog(null , "Veulliez remplir les champs");
+                return;
+            }
+
+            prof.setNom(nomValue);
+            prof.setPrenoms(prenomValue);
+            prof.setGrade(gradeValue);
+
+            profDAO.saveProf(prof);
+            JOptionPane.showMessageDialog(null , "Prof mis a Jour !");
+            mainEnseignants.loadProfs();
+            enseignantLayout.show(enseignantPage , "mainEnseignants");
+        }
     }
 }

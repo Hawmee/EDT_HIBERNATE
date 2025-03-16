@@ -1,15 +1,19 @@
 package com.example.controller.salles;
 
+import com.example.DAO.SalleDAO;
 import com.example.controller.enseignants.MainEnseignants;
+import com.example.model.Salles;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class MainSalles extends JPanel {
     private JTable table;
@@ -19,7 +23,12 @@ public class MainSalles extends JPanel {
     private JButton ajout , chercher;
     private CardLayout sallesLayout;
 
+    private DefaultTableModel tableModel;
+    private SalleDAO salleDAO;
+
     public MainSalles(JPanel sallesPages){
+        salleDAO = new SalleDAO();
+
 
         this.sallesPages = sallesPages;
         this.sallesLayout = (CardLayout) sallesPages.getLayout();
@@ -50,7 +59,8 @@ public class MainSalles extends JPanel {
         ajout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                sallesLayout.show(sallesPages , "ajoutSalles");
+                sallesPages.add(new AjoutSalles(sallesPages , MainSalles.this), "ajout");
+                sallesLayout.show(sallesPages , "ajout");
             }
         });
 
@@ -62,20 +72,20 @@ public class MainSalles extends JPanel {
                 {"Jane Smith", "5678", "Salle B"}
         };
 
-        DefaultTableModel model = new DefaultTableModel(dataEns , ensHeader) {
+        tableModel = new DefaultTableModel(new String[]{"CodeSal" , "Designation" , "Actions"} , 0) {
             @Override
             public boolean isCellEditable(int row , int column){
-                return column == 3 ;
+                return column == 2 ;
             }
         };
 
-        table = new JTable(model);
+        table = new JTable(tableModel);
         table.setBackground(Color.WHITE);
         table.setRowHeight(32);
         table.getTableHeader().setPreferredSize(new Dimension(table.getTableHeader().getPreferredSize().width ,32));
         table.getTableHeader().setReorderingAllowed(false);
-        table.getColumnModel().getColumn(3).setCellRenderer(new MainSalles.ButtonRenderer());
-        table.getColumnModel().getColumn(3).setCellEditor(new MainSalles.ButtonEditor());
+        table.getColumn("Actions").setCellRenderer(new MainSalles.ButtonRenderer());
+        table.getColumn("Actions").setCellEditor(new MainSalles.ButtonEditor());
         tableScrollPane = new JScrollPane(table);
         tableScrollPane.setBackground(Color.WHITE);
 
@@ -87,6 +97,25 @@ public class MainSalles extends JPanel {
 
         add(header , BorderLayout.NORTH);
         add(content , BorderLayout.CENTER);
+        loadSalles();
+    }
+
+    public void loadSalles(){
+        if(tableModel!=null){
+            tableModel.setRowCount(0);
+        }else {
+            System.err.println("Erreur : tableModel est null dans loadSalles");
+        }
+        List<Salles> salles = salleDAO.getAllSalles();
+        for(Salles s:salles){
+            tableModel.addRow(new Object[]{s.getCodesal() , s.getDesignation() , null});
+        }
+    }
+
+    private void deleteSalle(int codeSal){
+        salleDAO.deletSalle(codeSal);
+        JOptionPane.showMessageDialog(null , "Salle Supprimée !");
+        loadSalles();
     }
 
 
@@ -120,14 +149,42 @@ public class MainSalles extends JPanel {
             panel.add(deleteButton);
 
             editButton.addActionListener(e -> {
-                System.out.println("Modifier clicked for row: " + selectedRow);
-                printRowData(selectedRow);
-                sallesLayout.show(sallesPages, "modifierSalles");
-                fireEditingStopped();
+                if(selectedRow!=-1){
+                    int selectedCodeSal = (int) table.getModel().getValueAt(selectedRow , 0);
+                    sallesPages.add(new ModifierSalles(sallesPages , MainSalles.this , selectedCodeSal) , "modif");
+                    sallesLayout.show(sallesPages, "modif");
+                    fireEditingStopped();
+                }
             });
 
             deleteButton.addActionListener(e -> {
-                System.out.println("Supprimer clicked for row: " + selectedRow);
+                if(selectedRow != -1 && selectedRow< table.getRowCount()){
+                    int selectedCodeSal = (int) table.getModel().getValueAt(selectedRow , 0);
+                    String[] options = {"Valider", "Annuler"};
+                    int choice = JOptionPane.showOptionDialog(
+                            null,
+                            "Voulez vous supprimer cet element ?",
+                            "Suppression de salle",
+                            JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.INFORMATION_MESSAGE,
+                            null,
+                            options,
+                            options[0]
+                    );
+                    if(choice ==0){
+                        if(table.isEditing()){
+                            table.getCellEditor().stopCellEditing();
+                        }
+                        deleteSalle(selectedCodeSal);
+
+//                        SwingUtilities.invokeLater(()->{
+//                            loadSalles();
+//                            selectedRow=-1;
+//                        });
+                    }
+                }else{
+                    JOptionPane.showMessageDialog(null, "Aucun élément sélectionné ou données invalides.");
+                }
                 fireEditingStopped();
             });
         }

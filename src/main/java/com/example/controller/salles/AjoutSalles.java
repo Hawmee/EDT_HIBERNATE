@@ -1,5 +1,8 @@
 package com.example.controller.salles;
 
+import com.example.DAO.SalleDAO;
+import com.example.model.Salles;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -15,8 +18,13 @@ public class AjoutSalles extends JPanel {
 
     private CardLayout sallesLayout;
     private GridBagConstraints gbc;
-    public AjoutSalles(JPanel sallesPage){
+    private MainSalles mainSalles;
+    private SalleDAO salleDAO;
 
+    public AjoutSalles(JPanel sallesPage , MainSalles mainSalles){
+        salleDAO = new SalleDAO();
+
+        this.mainSalles = mainSalles;
         this.sallesPage = sallesPage;
         this.sallesLayout = (CardLayout) sallesPage.getLayout();
 
@@ -49,7 +57,7 @@ public class AjoutSalles extends JPanel {
         gbc.insets = new Insets(5,5,5,5);
         gbc.fill= GridBagConstraints.HORIZONTAL;
 
-        nomLabel = new JLabel("Nom: ");
+        nomLabel = new JLabel("Designation: ");
         nom = new JTextField();
         nom.setPreferredSize(new Dimension(350,30));
 
@@ -77,6 +85,13 @@ public class AjoutSalles extends JPanel {
 
 
 
+        valider.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addSalle();
+            }
+        });
+
         annuler.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -86,5 +101,21 @@ public class AjoutSalles extends JPanel {
 
         add(header , BorderLayout.NORTH);
         add(content, BorderLayout.CENTER);
+    }
+
+    private void addSalle(){
+        String designation = nom.getText();
+
+        if(designation.isEmpty()){
+            JOptionPane.showMessageDialog(null , "Veuillez remplir le champ !");
+            return;
+        }
+
+        Salles salle = new Salles(designation);
+        salleDAO.saveSalle(salle);
+        nom.setText("");
+        mainSalles.loadSalles();
+        JOptionPane.showMessageDialog(null , "Nouvelle salle ajoutée !");
+        sallesLayout.show(sallesPage , "mainSalles");
     }
 }

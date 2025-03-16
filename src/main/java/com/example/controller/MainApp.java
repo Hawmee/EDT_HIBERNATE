@@ -43,30 +43,23 @@ public class MainApp extends JFrame {
 
     public MainApp(){
         setTitle("Occupation Salle");
-        setSize(1000 , 600);
+        setSize(1150 , 600);
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(mainWindow);
         setVisible(true);
 
         mainEnseignants = new MainEnseignants(pageEnseignants);
-        ajoutEnseignants = new AjoutEnseignants(pageEnseignants);
-        modifEnseignants = new ModifierEnseignants(pageEnseignants);
-
         mainSalles = new MainSalles(pageSalles);
-        ajoutSalles = new AjoutSalles(pageSalles);
-        modifierSalles = new ModifierSalles(pageSalles);
+
 
 
         MainPages.add("enseignants" , pageEnseignants);
         MainPages.add("salles" , pageSalles);
         MainPages.add("occupation" , pageOccupation);
+
         pageEnseignants.add("mainEnseignants" , mainEnseignants);
-        pageEnseignants.add("ajoutEnseignants" , ajoutEnseignants);
-        pageEnseignants.add("modifier" , modifEnseignants);
         pageSalles.add("mainSalles" , mainSalles);
-        pageSalles.add("ajoutSalles" , ajoutSalles);
-        pageSalles.add("modifierSalles", modifierSalles);
         pageOccupation.add("mainOccupation" , mainOccupations);
         pageOccupation.add("ajoutOccupation" , ajoutOccupations);
         pageOccupation.add("modifierOccupation" , modifierOccupations);

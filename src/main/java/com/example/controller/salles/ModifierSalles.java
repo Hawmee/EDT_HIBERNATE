@@ -1,5 +1,8 @@
 package com.example.controller.salles;
 
+import com.example.DAO.SalleDAO;
+import com.example.model.Salles;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -16,8 +19,15 @@ public class ModifierSalles extends JPanel {
     private CardLayout sallesLayout;
     private GridBagConstraints gbc;
 
-    public ModifierSalles(JPanel sallesPage){
+    private MainSalles mainSalles;
+    private int selectedCodeSal;
+    private SalleDAO salleDAO;
 
+    public ModifierSalles(JPanel sallesPage , MainSalles mainSalles , int selectedCodeSal){
+        salleDAO = new SalleDAO();
+
+        this.mainSalles = mainSalles;
+        this.selectedCodeSal= selectedCodeSal;
         this.sallesPage = sallesPage;
         this.sallesLayout = (CardLayout) sallesPage.getLayout();
 
@@ -36,7 +46,7 @@ public class ModifierSalles extends JPanel {
         content.setBackground(Color.WHITE);
         content.setBorder(new EmptyBorder(50,0,0,0));
         formContainer = new JPanel(new BorderLayout());
-        formContainer.setPreferredSize(new Dimension(380 , 200));
+        formContainer.setPreferredSize(new Dimension(380 , 150));
         content.add(formContainer , BorderLayout.CENTER);
         headerContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
         contentTitle = new JLabel("Modification d'une salle");
@@ -50,7 +60,7 @@ public class ModifierSalles extends JPanel {
         gbc.insets = new Insets(5,5,5,5);
         gbc.fill= GridBagConstraints.HORIZONTAL;
 
-        nomLabel = new JLabel("Nom: ");
+        nomLabel = new JLabel("Designation : ");
         nom = new JTextField();
         nom.setPreferredSize(new Dimension(350,30));
 
@@ -78,6 +88,12 @@ public class ModifierSalles extends JPanel {
 
 
 
+        valider.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateSalle();
+            }
+        });
         annuler.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -87,5 +103,31 @@ public class ModifierSalles extends JPanel {
 
         add(header , BorderLayout.NORTH);
         add(content, BorderLayout.CENTER);
+        populateForm(selectedCodeSal);
+    }
+
+    private void populateForm(int codeSal){
+        Salles salle = salleDAO.findSalleById(codeSal);
+
+        if(salle!=null){
+            nom.setText(salle.getDesignation());
+        }
+    }
+
+    private void updateSalle(){
+        String designation = nom.getText();
+
+        Salles salle = salleDAO.findSalleById(selectedCodeSal);
+        if(salle!=null){
+            if(designation.isEmpty()){
+                JOptionPane.showMessageDialog(null , "Veuillez remplir le champ !");
+            }
+
+            salle.setDesignation(designation);
+            salleDAO.saveSalle(salle);
+            JOptionPane.showMessageDialog(null , "Salle mise a Jour !");
+            mainSalles.loadSalles();
+            sallesLayout.show(sallesPage , "mainSalles");
+        }
     }
 }

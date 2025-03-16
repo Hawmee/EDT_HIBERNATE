@@ -1,5 +1,8 @@
 package com.example.controller.enseignants;
 
+import com.example.DAO.ProfDAO;
+import com.example.model.Profs;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
@@ -8,15 +11,33 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class MainEnseignants extends JPanel {
     private JTable table;
+
+    private JOptionPane jOptionPane = new JOptionPane();
     private JScrollPane tableScrollPane;
     private JPanel header , headerButtons , searchWrapper ,search ,  content , enseignantPage;
 
     private JButton ajout , chercher;
     private CardLayout enseignantsLayout;
+
+    private DefaultTableModel tableModel;
+    private ProfDAO profDAO;
+
+    public MainEnseignants(){
+        tableModel = new DefaultTableModel(new String[]{"CodeProf","Nom", "Prenom" , "Grade" , "Actions"} , 0) {
+            @Override
+            public boolean isCellEditable(int row , int column){
+                return column == 4 ;
+            }
+        };
+
+        profDAO = new ProfDAO();
+    }
     public MainEnseignants(JPanel enseignantPage){
+        profDAO = new ProfDAO();
 
         this.enseignantPage = enseignantPage;
         this.enseignantsLayout = (CardLayout) enseignantPage.getLayout();
@@ -41,7 +62,7 @@ public class MainEnseignants extends JPanel {
         chercher = new JButton("chercher");
         chercher.setPreferredSize(new Dimension(chercher.getPreferredSize().width , 30));
         searchWrapper = new JPanel(new BorderLayout());
-        searchWrapper.setBorder(new EmptyBorder(0 , 425 ,0 ,0));
+        searchWrapper.setBorder(new EmptyBorder(0 , 580 ,0 ,0));
         searchWrapper.setBackground(Color.WHITE);
         search = new JPanel(new BorderLayout()); // Keep BorderLayout for text and button alignment
 
@@ -61,32 +82,46 @@ public class MainEnseignants extends JPanel {
         ajout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                enseignantPage.add(new AjoutEnseignants(enseignantPage, MainEnseignants.this) , "ajoutEnseignants");
                 enseignantsLayout.show(enseignantPage , "ajoutEnseignants");
             }
         });
 
+        chercher.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String searchValue = searchText.getText();
+                if(!searchValue.isEmpty()){
+                    try{
+                        Integer criteria = Integer.parseInt(searchValue);
+                        List<Profs> profs = profDAO.findProf(criteria);
+                        updateTable(profs);
+                    }catch(NumberFormatException ex){
+                        List<Profs> profs = profDAO.findProf(searchValue);
+                        updateTable(profs);
+                    }
+                }else{
+                    loadProfs();
+                }
+            }
+        });
 
 
-        String[] ensHeader = {"nom" , "Matricule" , "Occupation" , "Actions"};
-        Object[][] dataEns = {
-                {"John Doe", "1234", "Salle A"},
-                {"Jane Smith", "5678", "Salle B"}
-        };
-
-        DefaultTableModel model = new DefaultTableModel(dataEns , ensHeader) {
+        tableModel = new DefaultTableModel(new String[]{"CodeProf","Nom", "Prenom" , "Grade" , "Actions"} , 0) {
             @Override
             public boolean isCellEditable(int row , int column){
-                return column == 3 ;
+                return column == 4 ;
             }
         };
 
-        table = new JTable(model);
+        table = new JTable(tableModel);
         table.setBackground(Color.WHITE);
+//        table.removeColumn(table.getColumnModel().getColumn(0));
         table.setRowHeight(32);
         table.getTableHeader().setPreferredSize(new Dimension(table.getTableHeader().getPreferredSize().width ,32));
         table.getTableHeader().setReorderingAllowed(false);
-        table.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
-        table.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor());
+        table.getColumn("Actions").setCellRenderer(new ButtonRenderer());
+        table.getColumn("Actions").setCellEditor(new ButtonEditor());
         tableScrollPane = new JScrollPane(table);
         tableScrollPane.setBackground(Color.WHITE);
 
@@ -95,9 +130,35 @@ public class MainEnseignants extends JPanel {
         content.setBorder(new EmptyBorder(12,2,0,2));
         content.add(tableScrollPane , BorderLayout.CENTER);
 
+        loadProfs();
+
 
         add(header , BorderLayout.NORTH);
         add(content , BorderLayout.CENTER);
+    }
+
+    public void loadProfs(){
+        if (tableModel != null) {
+            tableModel.setRowCount(0);
+        } else {
+            System.err.println("Erreur : tableModel est null dans loadProfs");
+        };
+        List<Profs> profs = profDAO.getAllProfs();
+        for (Profs p : profs){
+            tableModel.addRow(new Object[]{p.getCodeprof() , p.getNom() , p.getPrenoms() , p.getGrade() , null});
+        }
+    }
+
+    private void updateTable(List<Profs> profs){
+        tableModel.setRowCount(0);
+        for (Profs p : profs ){
+            tableModel.addRow(new Object[]{p.getCodeprof(), p.getNom(), p.getPrenoms(), p.getGrade() , null});
+        }
+    }
+
+    private void deleteProf(int selectedProfId){
+        profDAO.deleteProfs(selectedProfId);
+        JOptionPane.showMessageDialog(null , "Prof supprimé !");
     }
 
 
@@ -106,7 +167,7 @@ public class MainEnseignants extends JPanel {
         private final JButton deleteButton = new JButton("Supprimer");
 
         public ButtonRenderer() {
-            setLayout(new FlowLayout(FlowLayout.CENTER, 5, 1));
+            setLayout(new FlowLayout(FlowLayout.CENTER, 0, 1));
             add(editButton);
             add(deleteButton);
         }
@@ -126,19 +187,51 @@ public class MainEnseignants extends JPanel {
         private int selectedRow;
 
         public ButtonEditor() {
-            panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
+            panel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
             panel.add(editButton);
             panel.add(deleteButton);
 
             editButton.addActionListener(e -> {
-                System.out.println("Modifier clicked for row: " + selectedRow);
-                printRowData(selectedRow);
-                enseignantsLayout.show(enseignantPage, "modifier");
-                fireEditingStopped();
+                if(selectedRow != -1){
+                    int selectedProfId = (int) table.getModel().getValueAt(selectedRow , 0);
+                    enseignantPage.add(new ModifierEnseignants(enseignantPage , MainEnseignants.this , selectedProfId) , "modifierEnseignant");
+                    enseignantsLayout.show(enseignantPage , "modifierEnseignant");
+                }
             });
 
             deleteButton.addActionListener(e -> {
-                System.out.println("Supprimer clicked for row: " + selectedRow);
+                if(selectedRow != -1 && selectedRow < table.getRowCount()) {
+                    int selectedProfId = (int) table.getModel().getValueAt(selectedRow, 0);
+                    String[] options = {"Valider", "Annuler"};
+                    int choice = JOptionPane.showOptionDialog(
+                            null,
+                            "Voulez vous supprimer cet element ?",
+                            "Suppression de prof",
+                            JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.INFORMATION_MESSAGE,
+                            null,
+                            options,
+                            options[0]
+                    );
+                    if(choice == 0){
+                        // Make sure to stop cell editing BEFORE modifying the table model
+                        if (table.isEditing()) {
+                            table.getCellEditor().stopCellEditing();
+                        }
+
+                        deleteProf(selectedProfId);
+
+                        // Use SwingUtilities.invokeLater to update the table after the current event
+                        SwingUtilities.invokeLater(() -> {
+                            loadProfs();
+                            selectedRow = -1;
+                        });
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Aucun élément sélectionné ou données invalides.");
+                }
+
+                // Always fire editing stopped at the end
                 fireEditingStopped();
             });
         }

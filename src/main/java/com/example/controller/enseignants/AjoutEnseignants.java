@@ -1,5 +1,8 @@
 package com.example.controller.enseignants;
 
+import com.example.DAO.ProfDAO;
+import com.example.model.Profs;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -14,7 +17,17 @@ public class AjoutEnseignants extends JPanel {
     private JButton valider , annuler;
     private CardLayout enseignantLayout;
     private GridBagConstraints gbc;
-    public AjoutEnseignants(JPanel enseignantPage){
+
+    private MainEnseignants mainEnseignants;
+
+    private JOptionPane jOptionPane = new JOptionPane();
+
+
+    private ProfDAO profDAO ;
+    public AjoutEnseignants(JPanel enseignantPage , MainEnseignants mainEnseignant){
+
+        profDAO = new ProfDAO();
+        this.mainEnseignants = mainEnseignant;
 
         this.enseignantPage = enseignantPage;
         this.enseignantLayout = (CardLayout) enseignantPage.getLayout();
@@ -110,7 +123,33 @@ public class AjoutEnseignants extends JPanel {
             }
         });
 
+        valider.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addProfs();
+            }
+        });
+
         add(header , BorderLayout.NORTH);
         add(content, BorderLayout.CENTER);
+    }
+
+    private void addProfs(){
+        String nomValue = nom.getText();
+        String prenomValue = prenom.getText();
+        String gradeValue = grade.getText();
+
+        if(nomValue.isEmpty() || prenomValue.isEmpty() || gradeValue.isEmpty()){
+            JOptionPane.showMessageDialog(null , "Veuillez remplir les champs.");
+            return;
+        }
+
+        Profs prof = new Profs(nomValue , prenomValue , gradeValue);
+        profDAO.saveProf(prof);
+        nom.setText("");
+        prenom.setText("");
+        grade.setText("");
+        mainEnseignants.loadProfs();
+        enseignantLayout.show(enseignantPage , "mainEnseignants");
     }
 }
