@@ -1,7 +1,9 @@
 package com.example.controller.salles;
 
 import com.example.DAO.SalleDAO;
+import com.example.controller.MainApp;
 import com.example.controller.enseignants.MainEnseignants;
+import com.example.controller.occupations.MainOccupation;
 import com.example.model.Salles;
 
 import javax.swing.*;
@@ -26,12 +28,15 @@ public class MainSalles extends JPanel {
     private DefaultTableModel tableModel;
     private SalleDAO salleDAO;
 
-    public MainSalles(JPanel sallesPages){
-        salleDAO = new SalleDAO();
+    private MainApp mainApp;
+    public MainOccupation mainOcc;
 
+    public MainSalles(JPanel sallesPages , MainOccupation mainOccupation){
+        salleDAO = new SalleDAO();
 
         this.sallesPages = sallesPages;
         this.sallesLayout = (CardLayout) sallesPages.getLayout();
+        this.mainOcc = mainOccupation;
 
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -98,6 +103,7 @@ public class MainSalles extends JPanel {
         add(header , BorderLayout.NORTH);
         add(content , BorderLayout.CENTER);
         loadSalles();
+
     }
 
     public void loadSalles(){
@@ -116,6 +122,8 @@ public class MainSalles extends JPanel {
         salleDAO.deletSalle(codeSal);
         JOptionPane.showMessageDialog(null , "Salle Supprimée !");
         loadSalles();
+        mainOcc.loadOcc();
+        mainOcc.loadLists();
     }
 
 

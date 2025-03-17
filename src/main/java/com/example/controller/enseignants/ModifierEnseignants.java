@@ -163,6 +163,8 @@ public class ModifierEnseignants extends JPanel {
             profDAO.saveProf(prof);
             JOptionPane.showMessageDialog(null , "Prof mis a Jour !");
             mainEnseignants.loadProfs();
+            mainEnseignants.mainOcc.loadLists();
+            mainEnseignants.mainOcc.loadOcc();
             enseignantLayout.show(enseignantPage , "mainEnseignants");
         }
     }

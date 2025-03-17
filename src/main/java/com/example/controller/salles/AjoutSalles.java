@@ -115,6 +115,7 @@ public class AjoutSalles extends JPanel {
         salleDAO.saveSalle(salle);
         nom.setText("");
         mainSalles.loadSalles();
+        mainSalles.mainOcc.loadLists();
         JOptionPane.showMessageDialog(null , "Nouvelle salle ajoutée !");
         sallesLayout.show(sallesPage , "mainSalles");
     }

@@ -2,7 +2,10 @@ package com.example.model;
 
 import jakarta.persistence.*;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Locale;
 
 @Entity
 @Table(name = "occuper")
@@ -20,10 +23,10 @@ public class Occupations {
     private Salles salle;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime date;
+    private Date date;
 
     public Occupations(){}
-    public Occupations(Profs prof , Salles salle , LocalDateTime date){
+    public Occupations(Profs prof , Salles salle , Date date){
         this.prof = prof;
         this.salle= salle;
         this.date = date;
@@ -49,12 +52,17 @@ public class Occupations {
         this.salle = salle;
     }
 
-    public LocalDateTime getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getFormatedDate(){
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE dd MMMM yyyy , HH:mm" , Locale.FRENCH);
+        return sdf.format(date);
     }
 
     @Override

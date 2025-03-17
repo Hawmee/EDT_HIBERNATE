@@ -1,6 +1,7 @@
 package com.example.controller.enseignants;
 
 import com.example.DAO.ProfDAO;
+import com.example.controller.occupations.MainOccupation;
 import com.example.model.Profs;
 
 import javax.swing.*;
@@ -26,21 +27,14 @@ public class MainEnseignants extends JPanel {
     private DefaultTableModel tableModel;
     private ProfDAO profDAO;
 
-    public MainEnseignants(){
-        tableModel = new DefaultTableModel(new String[]{"CodeProf","Nom", "Prenom" , "Grade" , "Actions"} , 0) {
-            @Override
-            public boolean isCellEditable(int row , int column){
-                return column == 4 ;
-            }
-        };
+    public MainOccupation mainOcc;
 
-        profDAO = new ProfDAO();
-    }
-    public MainEnseignants(JPanel enseignantPage){
+    public MainEnseignants(JPanel enseignantPage , MainOccupation mainOccupation){
         profDAO = new ProfDAO();
 
         this.enseignantPage = enseignantPage;
         this.enseignantsLayout = (CardLayout) enseignantPage.getLayout();
+        this.mainOcc = mainOccupation;
 
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -159,6 +153,23 @@ public class MainEnseignants extends JPanel {
     private void deleteProf(int selectedProfId){
         profDAO.deleteProfs(selectedProfId);
         JOptionPane.showMessageDialog(null , "Prof supprimé !");
+        mainOcc.loadOcc();
+        mainOcc.loadLists();
+    }
+
+    public String capitalize(String input){
+        String[] words = input.split("\\s+");
+        StringBuilder capitalizedString = new StringBuilder();
+
+        for(String word: words){
+            if(word.length() >0 ){
+                capitalizedString.append(word.substring(0,1).toUpperCase())
+                        .append(word.substring(1).toLowerCase())
+                        .append(" ");
+            }
+        }
+
+        return capitalizedString.toString().trim();
     }
 
 

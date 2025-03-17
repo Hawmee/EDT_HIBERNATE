@@ -127,6 +127,8 @@ public class ModifierSalles extends JPanel {
             salleDAO.saveSalle(salle);
             JOptionPane.showMessageDialog(null , "Salle mise a Jour !");
             mainSalles.loadSalles();
+            mainSalles.mainOcc.loadOcc();
+            mainSalles.mainOcc.loadLists();
             sallesLayout.show(sallesPage , "mainSalles");
         }
     }

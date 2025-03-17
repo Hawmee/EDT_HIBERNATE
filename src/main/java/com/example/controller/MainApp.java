@@ -4,6 +4,7 @@ import com.example.controller.enseignants.AjoutEnseignants;
 import com.example.controller.enseignants.MainEnseignants;
 import com.example.controller.enseignants.ModifierEnseignants;
 import com.example.controller.navigation.Navigation;
+import com.example.controller.occupations.MainOccupation;
 import com.example.controller.salles.AjoutSalles;
 import com.example.controller.salles.MainSalles;
 import com.example.controller.salles.ModifierSalles;
@@ -38,6 +39,8 @@ public class MainApp extends JFrame {
     private JPanel mainOccupations;
     private JPanel navBarLayout;
 
+    private MainOccupation mainOccupation;
+
 
 //    private JPanel mainPagesLayout;
 
@@ -49,20 +52,20 @@ public class MainApp extends JFrame {
         setContentPane(mainWindow);
         setVisible(true);
 
-        mainEnseignants = new MainEnseignants(pageEnseignants);
-        mainSalles = new MainSalles(pageSalles);
-
-
 
         MainPages.add("enseignants" , pageEnseignants);
         MainPages.add("salles" , pageSalles);
         MainPages.add("occupation" , pageOccupation);
 
+        mainOccupation = new MainOccupation(pageOccupation);
+        mainOccupations = mainOccupation;
+        mainEnseignants = new MainEnseignants(pageEnseignants , mainOccupation);
+        mainSalles = new MainSalles(pageSalles , mainOccupation);
+
         pageEnseignants.add("mainEnseignants" , mainEnseignants);
         pageSalles.add("mainSalles" , mainSalles);
         pageOccupation.add("mainOccupation" , mainOccupations);
-        pageOccupation.add("ajoutOccupation" , ajoutOccupations);
-        pageOccupation.add("modifierOccupation" , modifierOccupations);
+
 
         CardLayout enseignantsLayout = (CardLayout) pageEnseignants.getLayout();
 

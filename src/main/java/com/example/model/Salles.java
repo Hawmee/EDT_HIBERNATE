@@ -2,6 +2,8 @@ package com.example.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "salles")
 public class Salles {
@@ -10,6 +12,9 @@ public class Salles {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int codesal;
     private String designation;
+
+    @OneToMany(mappedBy = "salle", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Occupations> occupations;
 
     public Salles(){}
     public Salles(String designation ){

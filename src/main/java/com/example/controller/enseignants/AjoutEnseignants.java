@@ -135,9 +135,9 @@ public class AjoutEnseignants extends JPanel {
     }
 
     private void addProfs(){
-        String nomValue = nom.getText();
-        String prenomValue = prenom.getText();
-        String gradeValue = grade.getText();
+        String nomValue = nom.getText().toUpperCase();
+        String prenomValue = mainEnseignants.capitalize(prenom.getText());
+        String gradeValue = grade.getText().toUpperCase();
 
         if(nomValue.isEmpty() || prenomValue.isEmpty() || gradeValue.isEmpty()){
             JOptionPane.showMessageDialog(null , "Veuillez remplir les champs.");
@@ -150,6 +150,8 @@ public class AjoutEnseignants extends JPanel {
         prenom.setText("");
         grade.setText("");
         mainEnseignants.loadProfs();
+        mainEnseignants.mainOcc.loadLists();
+        JOptionPane.showMessageDialog(null , "Prof ajouté(e) avec success !");
         enseignantLayout.show(enseignantPage , "mainEnseignants");
     }
 }

@@ -2,6 +2,8 @@ package com.example.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "profs")
 public class Profs {
@@ -11,6 +13,9 @@ public class Profs {
     private String nom;
     private String prenoms;
     private String grade ;
+
+    @OneToMany(mappedBy = "prof", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Occupations> occupations;
 
     public Profs(){}
     public Profs(String nom , String prenoms , String grade){
