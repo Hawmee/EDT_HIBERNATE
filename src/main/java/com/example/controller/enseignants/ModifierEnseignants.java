@@ -143,9 +143,9 @@ public class ModifierEnseignants extends JPanel {
     }
 
     private void updateProf(){
-        String nomValue = nom.getText();
-        String prenomValue = prenom.getText();
-        String gradeValue = grade.getText();
+        String nomValue = nom.getText().toUpperCase();
+        String prenomValue = mainEnseignants.capitalize(prenom.getText());
+        String gradeValue = mainEnseignants.capitalize(grade.getText());
 
         Profs prof = profDAO.findProfById(selectedProfId);
 

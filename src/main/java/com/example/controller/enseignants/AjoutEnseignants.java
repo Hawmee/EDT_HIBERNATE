@@ -137,7 +137,7 @@ public class AjoutEnseignants extends JPanel {
     private void addProfs(){
         String nomValue = nom.getText().toUpperCase();
         String prenomValue = mainEnseignants.capitalize(prenom.getText());
-        String gradeValue = grade.getText().toUpperCase();
+        String gradeValue = mainEnseignants.capitalize(grade.getText());
 
         if(nomValue.isEmpty() || prenomValue.isEmpty() || gradeValue.isEmpty()){
             JOptionPane.showMessageDialog(null , "Veuillez remplir les champs.");
